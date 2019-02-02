@@ -1,6 +1,7 @@
 package com.dev.mygatedemo.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 public class UserModel extends RealmObject {
 
