@@ -2,6 +2,9 @@ package com.dev.mygatedemo;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import com.dev.mygatedemo.model.UserModel;
 import com.dev.mygatedemo.utils.AppUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,7 +46,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         String passcode = AppUtils.getValueFromData(model.getPasscode()).toString();
         holder.userName.setText(name);
         holder.userPasscode.setText(passcode);
-//        Glide.with(context).load(new File(model.getImg())).into(holder.userImageView);
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(model.getImg()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Glide.with(context).load(bitmap).into(holder.userImageView);
     }
 
     @Override

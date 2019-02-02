@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,11 +49,10 @@ public class ListActivity extends BaseActivity {
     RecyclerView userRecyclerView;
     @BindView(R.id.addUserFab)
     FloatingActionButton addUserFab;
-    private Uri imageUri;
-    private File file;
-    private String imageFilePath;
     private UserAdapter adapter;
     private Uri photoURI;
+    private String imageFilePath;
+    private List<UserModel> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,17 +65,18 @@ public class ListActivity extends BaseActivity {
     }
 
     private void getUsers() {
-        List<UserModel> users = RealmController.getInstance().getAllUsers();
-        pAppLogs.d(pTAG, "Count : " + users);
+        users = RealmController.getInstance().getAllUsers();
         if (users != null && users.size() > 0) {
+            pAppLogs.d(pTAG, "Count : " + users.size());
+            pAppLogs.d(pTAG, "Count adapter : " + adapter);
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
             } else {
                 adapter = new UserAdapter(pContext, users);
-                userRecyclerView.addItemDecoration(new DividerItemDecoration(pContext, DividerItemDecoration.VERTICAL));
-                userRecyclerView.setLayoutManager(new LinearLayoutManager(pContext));
-                userRecyclerView.setAdapter(adapter);
             }
+            userRecyclerView.addItemDecoration(new DividerItemDecoration(pContext, DividerItemDecoration.VERTICAL));
+            userRecyclerView.setLayoutManager(new LinearLayoutManager(pContext));
+            userRecyclerView.setAdapter(adapter);
         }
 
     }
@@ -87,31 +89,34 @@ public class ListActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("TAG", "Inside  : " + resultCode);
+        Log.d("TAG", "Inside onActivityResult : " + resultCode);
         if (resultCode == Activity.RESULT_OK) {
-//            if (data != null && data.getExtras() != null) {
-            try {
-//                    Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-//                    Random rnd = new Random();
-//                    int rand = 100000 + rnd.nextInt(900000);
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-
-
-                // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
-
-                // CALL THIS METHOD TO GET THE ACTUAL PATH
-                UserModel model = new UserModel();
-                model.setName("User");
-                model.setPasscode(String.valueOf(1));
-//                model.setImg(String.valueOf(photoURI));
-
-                RealmController.getInstance().saveUser(model);
-
-                getUsers();
-            } catch (Exception e) {
-                Log.d("tag", "error : " + e.getMessage());
+            Log.d("TAG", "Inside onActivityResult 1 : " + data);
+            Log.d("TAG", "Inside onActivityResult 2 : " + data.getExtras());
+            if (data != null && data.getExtras() != null) {
+                try {
+                    Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+                    Log.d("TAG", "Inside image 1 : " + imageBitmap);
+                    Log.d("TAG", "Inside image 2 : " + photoURI);
+                    Log.d("TAG", "Inside image 3 : " + imageFilePath);
+                    UserModel model = new UserModel();
+                    model.setName("User");
+                    Random rnd = new Random();
+                    int number = rnd.nextInt(999999);
+                    model.setPasscode(String.valueOf(number));
+                    model.setImg(String.valueOf(photoURI));
+                    RealmController.getInstance().saveUser(model);
+                    Handler handler = new Handler();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            getUsers();
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.d("tag", "error : " + e.getMessage());
+                }
             }
-//            }
         }
     }
 
@@ -145,10 +150,8 @@ public class ListActivity extends BaseActivity {
             }
             if (photoFile != null) {
                 photoURI = FileProvider.getUriForFile(this, "com.dev.mygatedemo.provider", photoFile);
-                pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        photoURI);
-                startActivityForResult(pictureIntent,
-                        Constants.KEY_CAPTURE_IMAGE);
+                pictureIntent.putExtra(MediaStore.ACTION_IMAGE_CAPTURE, photoURI);
+                startActivityForResult(pictureIntent, Constants.KEY_CAPTURE_IMAGE);
             }
         }
     }

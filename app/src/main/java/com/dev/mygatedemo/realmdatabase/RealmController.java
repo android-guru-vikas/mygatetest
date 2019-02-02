@@ -46,16 +46,14 @@ public class RealmController {
     }
 
     public void saveUser(final UserModel model) {
-        Log.d(TAG, "Inside delete all : " + realm);
-
+        Log.d(TAG, "Inside saveUser : " + model.toString());
         try {
             realm.executeTransactionAsync(realm -> realm.insertOrUpdate(model));
         } catch (Exception e) {
-            Log.d(TAG, "Inside sace all : " + e.getMessage());
+            Log.d(TAG, "Inside save exception : " + e.getMessage());
         }
 
     }
-
 
     public void deleteAll() {
         try {
@@ -72,7 +70,7 @@ public class RealmController {
             RealmResults<UserModel> docketList = realm.where(UserModel.class).findAll();
             users = realm.copyFromRealm(docketList);
         } catch (Exception e) {
-            Log.d(TAG, "Inside getDocketList : " + e.getMessage());
+            Log.d(TAG, "Inside getAllUsers exception : " + e.getMessage());
         }
         return users;
     }

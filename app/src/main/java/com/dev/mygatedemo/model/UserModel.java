@@ -1,15 +1,13 @@
 package com.dev.mygatedemo.model;
 
-import io.realm.RealmModel;
 import io.realm.RealmObject;
 
 public class UserModel extends RealmObject {
 
-    // Number from witch the sms was send
+    public UserModel() {
+    }
 
-    private String img;
-    // SMS text body
-    private String name, passcode;
+    private String name, passcode, img;
 
     public String getImg() {
         return img;
@@ -33,5 +31,14 @@ public class UserModel extends RealmObject {
 
     public void setPasscode(String passcode) {
         this.passcode = passcode;
+    }
+
+    @Override
+    public String toString() {
+        return "UserModel{" +
+                "name='" + name + '\'' +
+                ", passcode='" + passcode + '\'' +
+                ", img='" + img + '\'' +
+                '}';
     }
 }
